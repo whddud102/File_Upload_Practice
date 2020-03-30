@@ -89,10 +89,8 @@
 <script type="text/javascript">
 	function showImage(fileCallPath) {
 		//alert(fileCallPath);
-		
 		// display 속성 값을 flex로 수정
 		$(".bigPictureWrapper").css("display", "flex").show();
-		
 		$(".bigPicture").html("<img src='/display?fileName=" + encodeURI(fileCallPath) + "'>").animate({width: "100%", height: "100%"}, 1000);
 	}
 </script>
@@ -178,7 +176,8 @@
 					// 일반 파일인 경우
 					if(!obj.image) {
 						var fileCallPath = encodeURIComponent(obj.uploadPath + "/" + obj.uuid + "_" + obj.fileName);
-						str += "<li><a href='/download?fileName=" + fileCallPath + "'><img src='/resources/img/attach.png'>" + obj.fileName + "</li>";						
+						str += "<li><a href='/download?fileName=" + fileCallPath + "'><img src='/resources/img/attach.png'>" + obj.fileName + "</a>" 
+								+ "<span data-file=\'" + fileCallPath + "\' data-type = 'file'> 삭제 </span></li>";						
 					} 
 					// 이미지 파일인 경우
 					else {
@@ -191,7 +190,8 @@
 						orignPath = orignPath.replace(new RegExp(/\\/g), "/");
 						
 						// 썸네일에 원본 이미지를 표시하는 자바스크립트의 링크를 걸어둠
-						str += "<li><a href=\"javascript:showImage(\'" + orignPath + "\')\"><img src='/display?fileName=" + fileCallPath + "'><li>";
+						str += "<li><a href=\"javascript:showImage(\'" + orignPath + "\')\"><img src='/display?fileName=" + fileCallPath + "'></a>"
+								+ "<span data-file=\'" + fileCallPath + "\' data-type = 'image'> 삭제 </span></li>";
 					}
 				})
 				
@@ -204,9 +204,30 @@
 				// 1초에 걸려서 width, height를 축소
 				$(".bigPicture").animate({width: "0%", height: "0%"}, 1000);
 				setTimeout(function() {
-					$(this).hide();
+					$('.bigPictureWrapper').hide();
 				}, 1000)
 			})
+			
+		
+		$(".uploadResult").on("click", "span", function (e) {
+			// 삭제 하려는 파일의 data-file 속성 값 획득
+			var targetFile = $(this).data("file");
+			
+			// 삭제 하려는 파일의 data-type 속성 값 획득
+			var type = $(this).data("type");
+			
+			console.log(targetFile);
+			
+			$.ajax({
+				url: "/deleteFile",
+				data: {fileName : targetFile, type: type},
+				dataType: "text",
+				type: "POST",
+					success: function (result) {
+						alert("첨부파일 삭제 요청 성공");
+					}
+			});
+		})			
 			
 		});
 	</script>
